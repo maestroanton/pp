@@ -1,7 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
+
+#ifdef linux
 #include <SDL2/SDL.h>
 #include "./handle.h"
+#elif WIN32
+#include "SDL.h"
+#include "handle.h"
+#endif
 
 /* I know global variables suck but it is what it is. */
 
@@ -113,7 +119,7 @@ main(int argc, char **argv)
                         } else {
                             volume_knob.x = (slide + volume_rect.x) - volume_knob.w;
                         }
-                        } else if(SDL_PointInRect(&point, &balance_rect) && (evnt.motion.state & SDL_BUTTON_LMASK)) {
+                    } else if(SDL_PointInRect(&point, &balance_rect) && (evnt.motion.state & SDL_BUTTON_LMASK)) {
                             float slide = (float)(point.x - balance_rect.x);
                             balance_slider = (slide / ((float)balance_rect.w));
                             if(slide <= balance_knob.w) {
