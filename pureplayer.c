@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL2/SDL.h>
-
-#define ESFOLADA "/home/anton/music/esfolada.wav"
+#include "./handle.h"
 
 /* I know global variables suck but it is what it is. */
 
@@ -16,15 +15,13 @@ static Uint32 audioLen = 0;
 static SDL_AudioSpec audioSpec;
 static SDL_AudioStream *data_stream;
 
-void halt(void); /* Stops audio and cleans up. */
 SDL_bool load_wav(const char *fname); /* Loads WAV and creates audio stream. */
-void panic_abort(const char *title, const char *text); /* Cleans up and quits on catastrophic errors. */
 
 int
 main(int argc, char **argv)
 {
     if(SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO) == -1) {
-        panic_abort("Panic!", "Not able to init SNL.");
+        panic_abort("Panic!", "Not able to init SNL.", NULL);
     }
 
     SDL_AudioDeviceID speaker;
@@ -39,20 +36,18 @@ main(int argc, char **argv)
 
     speaker = SDL_OpenAudioDevice(NULL, 0, &audio, NULL, SDL_AUDIO_ALLOW_ANY_CHANGE);
     if(!speaker) {
-        panic_abort("Error!", SDL_GetError());
+        panic_abort("Error!", SDL_GetError(), NULL);
     }
 
     window = SDL_CreateWindow("Hello SDL!", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, 0);
     if(!window) {
-        panic_abort("SDL_CreateWindow failed.", SDL_GetError());
+        panic_abort("SDL_CreateWindow failed.", SDL_GetError(), NULL);
     }
 
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
     if(!renderer) {
-        panic_abort("SDL_CreateRenderer Failed.", SDL_GetError());
+        panic_abort("SDL_CreateRenderer Failed.", SDL_GetError(), window);
     }
-
-    load_wav(ESFOLADA);
 
     SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
 
@@ -93,16 +88,16 @@ main(int argc, char **argv)
                         SDL_AudioStreamClear(data_stream);
                         if(SDL_AudioStreamPut(data_stream, audioMemAddr, audioLen) == -1) {
                             SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error!", SDL_GetError(), window);
-                            halt();
+                            halt(data_stream, audioMemAddr, audioLen);
                         } else if(SDL_AudioStreamFlush(data_stream) == -1) {
                             SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error!", SDL_GetError(), window);
-                            halt();
+                            halt(data_stream, audioMemAddr, audioLen);
                         }
                     } else if(SDL_PointInRect(&point, &pause_rect)) {
                         paused = paused ? SDL_FALSE : SDL_TRUE;
                         SDL_PauseAudioDevice(speaker, paused);
                     } else if(SDL_PointInRect(&point, &stop_rect)) {
-                        halt();    
+                        halt(data_stream, audioMemAddr, audioLen);
                     }
 
                     break;
@@ -158,7 +153,7 @@ main(int argc, char **argv)
                 if(balance_slider != 0.5f) {
                     for(int i = 0; i < n_samples; i += 2) {
                         /* Even samples are left, odd samples are right (from 0) */
-                        to_buffer[i] *= (1.0f - balance_slider); 
+                        to_buffer[i] *= (1.0f - balance_slider);
                         to_buffer[i+1] *= balance_slider;
                         }
                 }
@@ -190,16 +185,6 @@ main(int argc, char **argv)
     SDL_DestroyWindow(window);
     SDL_Quit();
     return 0;
-}
-
-void
-panic_abort(const char *title, const char *text)
-{
-    fprintf(stderr, "%s ... %s\n", title, text);
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title, text, window);
-
-    SDL_Quit();
-    exit(1);
 }
 
 SDL_bool
@@ -236,20 +221,6 @@ load_wav(const char *fname)
     return SDL_TRUE;
 
     failed:
-        halt();
+        halt(data_stream, audioMemAddr, audioLen);
         return SDL_FALSE;
-}
-
-void
-halt(void)
-{
-    if(data_stream) {
-        SDL_FreeAudioStream(data_stream);
-    }
-    if(audioMemAddr) {
-        SDL_FreeWAV(audioMemAddr);
-    }
-    data_stream = NULL;
-    audioMemAddr = NULL;
-    audioLen = 0;
 }
