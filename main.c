@@ -247,7 +247,7 @@ halt(void)
         SDL_FreeAudioStream(data_stream);
     }
     if(audioMemAddr) {
-    SDL_FreeWAV(audioMemAddr);
+        SDL_FreeWAV(audioMemAddr);
     }
     data_stream = NULL;
     audioMemAddr = NULL;
