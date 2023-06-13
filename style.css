@@ -1,0 +1,102 @@
+*{
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+  box-sizing: border-box;
+}
+.container{
+  width: 100%;
+  height: 100vh;
+  background: rgb(131,58,180);
+  background: linear-gradient(0deg, rgba(131,58,180,1) 0%, rgba(21,0,94,1) 100%, rgba(252,176,69,1) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.music-player{
+  background: rgb(40,56,91);
+  background: linear-gradient(0deg, rgba(40,56,91,1) 3%, rgba(38,40,43,1) 83%);
+  width: 400px;
+
+  padding: 25px 35px;
+  text-align: center;
+}
+nav{
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 30px;
+}
+nav .circle{
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  background: #2b2930a6;
+  color: #f53192;
+  box-shadow: 0 3px 10px rgb(145, 101, 173);
+}
+.song-img{
+  width: 240px;
+  border-radius: 50%;
+  border: 5px solid #c295f596;
+  box-shadow: 0 10px 60px rgb(68, 56, 139);
+}
+.music-player h1 {
+  font-size: 20px;
+  font-weight: 400;
+  color: rgb(192, 193, 241);
+  margin-top: 20px;
+}
+
+.music-player p {
+  font-size: 14px;
+  color: rgb(149, 151, 231);
+}
+.audiobar{
+  padding-top: 10px;
+}
+#progress{
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  background: #7631f5;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 40px 0;
+}
+#progress::-webkit-slider-thumb{
+  -webkit-appearance: none;
+  background: #7631f5;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 8px solid #9582ff;
+  box-shadow: 0 5px 5px rgb(113, 59, 146);
+}
+.controls{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.controls div{
+  width: 55px;
+  height: 55px;
+  margin: 20px;
+  background: #e8d6f8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: #7631f5;
+  box-shadow: 0 5px 5px #743cf8;
+  cursor: pointer;
+}
+.controls div:nth-child(2){
+  transform: scale(1.5);
+  background: #6014ec;
+  color: #fff;
+}
+#ctrlIcon{
+  cursor: pointer;
+}
