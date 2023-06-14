@@ -91,22 +91,14 @@ main(int argc, char **argv)
                 case SDL_MOUSEBUTTONDOWN: {
                     const SDL_Point point = {evnt.button.x, evnt.button.y};
                     if(SDL_PointInRect(&point, &rewind_rect)) {
-                        /*SDL_ClearQueuedAudio(speaker);
-                        SDL_AudioStreamClear(data_stream);
-                        if(SDL_AudioStreamPut(data_stream, audioMemAddr, audioLen) == -1) {
-                            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error!", SDL_GetError(), window);
-                            halt(data_stream, audioMemAddr, audioLen);
-                        } else if(SDL_AudioStreamFlush(data_stream) == -1) {
-                            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error!", SDL_GetError(), window);
-                            halt(data_stream, audioMemAddr, audioLen);
-                        }
-                        */
                         rewind_wav(speaker, data_stream, audioMemAddr, audioLen, window);
                     } else if(SDL_PointInRect(&point, &pause_rect)) {
                         paused = paused ? SDL_FALSE : SDL_TRUE;
                         SDL_PauseAudioDevice(speaker, paused);
                     } else if(SDL_PointInRect(&point, &stop_rect)) {
-                        halt(data_stream, audioMemAddr, audioLen);
+                        paused = SDL_TRUE;
+                        rewind_wav(speaker, data_stream, audioMemAddr, audioLen, window);
+                        SDL_PauseAudioDevice(speaker, paused);
                     } else if(SDL_PointInRect(&point, &replay_rect)) {
                         replay = replay ? SDL_FALSE : SDL_TRUE;
                     }
