@@ -7,15 +7,27 @@
 .container{
   width: 100%;
   height: 100vh;
-  background: rgb(131,58,180);
-  background: linear-gradient(0deg, rgba(131,58,180,1) 0%, rgba(21,0,94,1) 100%, rgba(252,176,69,1) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
+	background: linear-gradient(-45deg, #be4ce0, #7023d5, #23d5ab);
+	background-size: 400% 400%;
+	animation: gradientAnimation 15s ease infinite;
+}
+
+@keyframes gradientAnimation {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
 }
 .music-player{
-  background: rgb(40,56,91);
   background: linear-gradient(0deg, rgba(40,56,91,1) 3%, rgba(38,40,43,1) 83%);
   width: 400px;
 
@@ -41,6 +53,17 @@ nav .circle{
   border-radius: 50%;
   border: 5px solid #c295f596;
   box-shadow: 0 10px 60px rgb(68, 56, 139);
+}
+.rotate {
+  animation: rotation 4s infinite linear;
+}
+@keyframes rotation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(359deg);
+  }
 }
 .music-player h1 {
   font-size: 20px;
@@ -78,6 +101,7 @@ nav .circle{
   display: flex;
   justify-content: center;
   align-items: center;
+  
 }
 .controls div{
   width: 55px;
@@ -99,4 +123,22 @@ nav .circle{
 }
 #ctrlIcon{
   cursor: pointer;
+}
+.time {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 10px 0;
+  
+}
+#currentTime {
+  margin-right: 10px;
+  color: #7631f5;
+  text-shadow: 3px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+#duration {
+  margin-left: 10px;
+  color: #7631f5;
+  text-shadow: 3px 2px 4px rgba(0, 0, 0, 0.5);
 }

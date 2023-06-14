@@ -32,7 +32,7 @@
           <i class="fa-solid fa-bars" style="color: #63728c;"></i>
         </div>
       </nav>
-      <img src="media/metal2.jpg" class="song-img">
+      <img src="media/metal2.jpg" class="song-img" id="foto">
       <h1>Metal Bucetation</h1>
       <p>Massacration</p>
 
@@ -61,6 +61,7 @@
     let progress = document.getElementById("progress");
     let song = document.getElementById("song");
     let ctrlIcon = document.getElementById("ctrlIcon");
+    let songImg = document.getElementById("foto");
 
     song.onloadedmetadata = function() {
       progress.max = song.duration;
@@ -73,10 +74,12 @@
         song.pause();
         ctrlIcon.classList.remove("fa-pause")
         ctrlIcon.classList.add("fa-play")
+        songImg.classList.remove("rotate")
       }else{
         song.play();
         ctrlIcon.classList.add("fa-pause")
         ctrlIcon.classList.remove("fa-play")
+        songImg.classList.add("rotate")
       }
     }
 
