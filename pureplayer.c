@@ -3,11 +3,10 @@
 
 #ifdef __linux__
 #include <SDL2/SDL.h>
-#include "handle.h"
 #elif _WIN32
 #include "SDL.h"
-#include "handle.h"
 #endif
+#include "handle.h"
 
 /* I know global variables suck but it is what it is. */
 
