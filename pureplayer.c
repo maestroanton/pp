@@ -17,6 +17,7 @@ static Uint32 audioLen = 0;
 static SDL_AudioSpec audioSpec;
 static SDL_AudioStream *data_stream;
 
+SDL_bool rewind_wav(SDL_AudioDeviceID *spk, SDL_AudioStream *stream, Uint8 *buf, Uint32 len, SDL_Window *win); /* Restart */
 SDL_bool load_wav(const char *fname, SDL_Window *win); /* Loads WAV and creates audio stream. */
 
 int
@@ -57,10 +58,12 @@ main(int argc, char **argv)
 
     SDL_bool go_on = SDL_TRUE;
     SDL_bool paused = SDL_TRUE;
+    SDL_bool replay = SDL_FALSE;
 
     const SDL_Rect rewind_rect = {120, 140, 100, 100};
     const SDL_Rect pause_rect = {480, 140, 100, 100};
     const SDL_Rect stop_rect = {360, 140, 100, 100};
+    const SDL_Rect replay_rect = {240, 140, 100, 100};
     const SDL_Rect volume_rect = {120, 340, 460, 25};
     const SDL_Rect panning_rect = {120, 420, 460, 25};
 
@@ -88,7 +91,7 @@ main(int argc, char **argv)
                 case SDL_MOUSEBUTTONDOWN: {
                     const SDL_Point point = {evnt.button.x, evnt.button.y};
                     if(SDL_PointInRect(&point, &rewind_rect)) {
-                        SDL_ClearQueuedAudio(speaker);
+                        /*SDL_ClearQueuedAudio(speaker);
                         SDL_AudioStreamClear(data_stream);
                         if(SDL_AudioStreamPut(data_stream, audioMemAddr, audioLen) == -1) {
                             SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error!", SDL_GetError(), window);
@@ -97,11 +100,15 @@ main(int argc, char **argv)
                             SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error!", SDL_GetError(), window);
                             halt(data_stream, audioMemAddr, audioLen);
                         }
+                        */
+                        rewind_wav(speaker, data_stream, audioMemAddr, audioLen, window);
                     } else if(SDL_PointInRect(&point, &pause_rect)) {
                         paused = paused ? SDL_FALSE : SDL_TRUE;
                         SDL_PauseAudioDevice(speaker, paused);
                     } else if(SDL_PointInRect(&point, &stop_rect)) {
                         halt(data_stream, audioMemAddr, audioLen);
+                    } else if(SDL_PointInRect(&point, &replay_rect)) {
+                        replay = replay ? SDL_FALSE : SDL_TRUE;
                     }
 
                     break;
@@ -168,6 +175,10 @@ main(int argc, char **argv)
                 }
 
                 SDL_QueueAudio(speaker, converted_buffer, new_bytes);
+
+            /* If a data stream exists and we've run out of bytes on it while replay is true, rewind. */
+            } else if(data_stream && replay) {
+                rewind_wav(speaker, data_stream, audioMemAddr, audioLen, window);
             }
         }
 
@@ -178,6 +189,7 @@ main(int argc, char **argv)
         SDL_RenderFillRect(renderer, &rewind_rect);
         SDL_RenderFillRect(renderer, &pause_rect);
         SDL_RenderFillRect(renderer, &stop_rect);
+        SDL_RenderFillRect(renderer, &replay_rect);
         SDL_RenderFillRect(renderer, &volume_rect);
         SDL_RenderFillRect(renderer, &panning_rect);
 
@@ -214,22 +226,37 @@ load_wav(const char *fname, SDL_Window *win)
     if(!data_stream) {
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error!", SDL_GetError(), win);
         goto failed;
-
-    }
-
-    if(SDL_AudioStreamPut(data_stream, audioMemAddr, audioLen) == -1) {
+    } else if(SDL_AudioStreamPut(data_stream, audioMemAddr, audioLen) == -1) {
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error!", SDL_GetError(), win);
         goto failed;
-    }
-
-    if(SDL_AudioStreamFlush(data_stream) == -1) {
+    } else if(SDL_AudioStreamFlush(data_stream) == -1) {
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error!", SDL_GetError(), win);
         goto failed;
     }
 
     return SDL_TRUE;
 
-    failed:
+failed:
         halt(data_stream, audioMemAddr, audioLen);
         return SDL_FALSE;
+}
+
+SDL_bool
+rewind_wav(SDL_AudioDeviceID *spk, SDL_AudioStream *stream, Uint8 *buf, Uint32 len, SDL_Window *win)
+{
+    SDL_ClearQueuedAudio(spk);
+    SDL_AudioStreamClear(stream);
+    if(SDL_AudioStreamPut(stream, buf, len) == -1) {
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error!", SDL_GetError(), win);
+        goto failed;
+    } else if(SDL_AudioStreamFlush(stream) == -1) {
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error!", SDL_GetError(), win);
+        goto failed;
+    }
+
+    return SDL_TRUE;
+
+failed:
+    halt(stream, buf, len);
+    return SDL_FALSE;
 }
