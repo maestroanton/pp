@@ -1,27 +1,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef linux
+#ifdef __linux__
 #include <SDL2/SDL.h>
-#include "./handle.h"
-#elif WIN32
+#include "handle.h"
+#elif _WIN32
 #include "SDL.h"
 #include "handle.h"
 #endif
 
 /* I know global variables suck but it is what it is. */
 
-static SDL_Window   *window = NULL;
-static SDL_Renderer *renderer = NULL;
-
 static float volume_slider = 1.0f; /* Volume. 0 being mute and 1 being full blast. */
-static float balance_slider = 0.5f; /* Balance L-R. 0.5 is equal, 0 is full left and 1 is full right. */
+static float panning_slider = 0.5f; /* Balance L-R. 0.5 is equal, 0 is full left and 1 is full right. */
 static Uint8 *audioMemAddr = NULL;
 static Uint32 audioLen = 0;
 static SDL_AudioSpec audioSpec;
 static SDL_AudioStream *data_stream;
 
-SDL_bool load_wav(const char *fname); /* Loads WAV and creates audio stream. */
+SDL_bool load_wav(const char *fname, SDL_Window *win); /* Loads WAV and creates audio stream. */
 
 int
 main(int argc, char **argv)
@@ -32,6 +29,8 @@ main(int argc, char **argv)
 
     SDL_AudioDeviceID speaker;
     SDL_AudioSpec audio;
+    SDL_Window   *window = NULL;
+    SDL_Renderer *renderer = NULL;
 
     SDL_zero(audio);
     audio.freq = 48000;
@@ -64,12 +63,12 @@ main(int argc, char **argv)
     const SDL_Rect pause_rect = {480, 140, 100, 100};
     const SDL_Rect stop_rect = {360, 140, 100, 100};
     const SDL_Rect volume_rect = {120, 340, 460, 25};
-    const SDL_Rect balance_rect = {120, 420, 460, 25};
+    const SDL_Rect panning_rect = {120, 420, 460, 25};
 
-    SDL_Rect balance_knob;
-    SDL_memcpy(&balance_knob, &balance_rect, sizeof(SDL_Rect));
-    balance_knob.w = 10;
-    balance_knob.x = (balance_rect.x + (balance_rect.w / 2)) - balance_knob.w;
+    SDL_Rect panning_knob;
+    SDL_memcpy(&panning_knob, &panning_rect, sizeof(SDL_Rect));
+    panning_knob.w = 10;
+    panning_knob.x = (panning_rect.x + (panning_rect.w / 2)) - panning_knob.w;
 
     SDL_Rect volume_knob;
     SDL_memcpy(&volume_knob, &volume_rect, sizeof(SDL_Rect));
@@ -119,20 +118,20 @@ main(int argc, char **argv)
                         } else {
                             volume_knob.x = (slide + volume_rect.x) - volume_knob.w;
                         }
-                    } else if(SDL_PointInRect(&point, &balance_rect) && (evnt.motion.state & SDL_BUTTON_LMASK)) {
-                            float slide = (float)(point.x - balance_rect.x);
-                            balance_slider = (slide / ((float)balance_rect.w));
-                            if(slide <= balance_knob.w) {
-                                balance_knob.x = (balance_rect.x);
+                    } else if(SDL_PointInRect(&point, &panning_rect) && (evnt.motion.state & SDL_BUTTON_LMASK)) {
+                            float slide = (float)(point.x - panning_rect.x);
+                            panning_slider = (slide / ((float)panning_rect.w));
+                            if(slide <= panning_knob.w) {
+                                panning_knob.x = (panning_rect.x);
                             } else {
-                                balance_knob.x = (slide + balance_rect.x) - balance_knob.w;
+                                panning_knob.x = (slide + panning_rect.x) - panning_knob.w;
                             }
                         }
                     break;
                 }
 
                 case SDL_DROPFILE: {
-                    load_wav(evnt.drop.file);
+                    load_wav(evnt.drop.file, window);
                     SDL_free(evnt.drop.file);
                     break;
                 }
@@ -148,20 +147,25 @@ main(int argc, char **argv)
                 float *to_buffer = (float *) converted_buffer;
                 const int n_samples = (new_bytes / sizeof(float));
 
-                /* Change volume (but only if needed) */
+                SDL_assert((n_samples % 2) == 0); /* Assert we have stereo sound. */
+
+                /* Change volume. (FIXME: non-linear) */
                 if(volume_slider != 1.0f) {
                     for(int i = 0; i < n_samples; i++) {
                         to_buffer[i] *= volume_slider;
                     }
                 }
 
-                /* Change balance (L-R speaker) */
-                if(balance_slider != 0.5f) {
+                /* Change panning. (L-R speaker) */
+                /* Sample 0 - Left | Sample 1 - Right. */
+                if(panning_slider < 0.5f) {
                     for(int i = 0; i < n_samples; i += 2) {
-                        /* Even samples are left, odd samples are right (from 0) */
-                        to_buffer[i] *= (1.0f - balance_slider);
-                        to_buffer[i+1] *= balance_slider;
+                        to_buffer[i+1] *= panning_slider;
                         }
+                } else if(panning_slider > 0.5f) {
+                    for(int i = 0; i < n_samples; i += 2) {
+                        to_buffer[i] *= (1.0f - panning_slider);
+                    }
                 }
 
                 SDL_QueueAudio(speaker, converted_buffer, new_bytes);
@@ -176,11 +180,11 @@ main(int argc, char **argv)
         SDL_RenderFillRect(renderer, &pause_rect);
         SDL_RenderFillRect(renderer, &stop_rect);
         SDL_RenderFillRect(renderer, &volume_rect);
-        SDL_RenderFillRect(renderer, &balance_rect);
+        SDL_RenderFillRect(renderer, &panning_rect);
 
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderFillRect(renderer, &volume_knob);
-        SDL_RenderFillRect(renderer, &balance_knob);
+        SDL_RenderFillRect(renderer, &panning_knob);
 
         SDL_RenderPresent(renderer);
     }
@@ -194,7 +198,7 @@ main(int argc, char **argv)
 }
 
 SDL_bool
-load_wav(const char *fname)
+load_wav(const char *fname, SDL_Window *win)
 {
     SDL_FreeAudioStream(data_stream);
     SDL_FreeWAV(audioMemAddr);
@@ -203,24 +207,24 @@ load_wav(const char *fname)
     audioLen = 0;
 
     if(SDL_LoadWAV(fname, &audioSpec, &audioMemAddr, &audioLen) == NULL) {
-        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error!", SDL_GetError(), window);
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error!", SDL_GetError(), win);
         goto failed;
     }
 
     data_stream = SDL_NewAudioStream(audioSpec.format, audioSpec.channels, audioSpec.freq, AUDIO_F32, 2, 48000);
     if(!data_stream) {
-        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error!", SDL_GetError(), window);
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error!", SDL_GetError(), win);
         goto failed;
 
     }
 
     if(SDL_AudioStreamPut(data_stream, audioMemAddr, audioLen) == -1) {
-        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error!", SDL_GetError(), window);
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error!", SDL_GetError(), win);
         goto failed;
     }
 
     if(SDL_AudioStreamFlush(data_stream) == -1) {
-        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error!", SDL_GetError(), window);
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error!", SDL_GetError(), win);
         goto failed;
     }
 
