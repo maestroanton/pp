@@ -17,6 +17,7 @@
 
   <!-- ícones -->
   <script src="https://kit.fontawesome.com/a1e181d071.js" crossorigin="anonymous"></script>
+
   <!-- ícones -->
 
 </head>
@@ -39,7 +40,12 @@
       <audio id="song">
         <source src="media/metalbuce.mp3" type="audio/mpeg">
       </audio>
-      <input type="range" value="0" id="progress">
+      <div class="time">
+        <span id="currentTime">0:00</span>
+        <input type="range" value="0" id="progress">
+        <span id="duration">0:00</span>
+      </div>
+
 
       <div class="controls">
         <div>
@@ -56,47 +62,7 @@
     </div>
   </div>
 
-  <script>
-    
-    let progress = document.getElementById("progress");
-    let song = document.getElementById("song");
-    let ctrlIcon = document.getElementById("ctrlIcon");
-    let songImg = document.getElementById("foto");
-
-    song.onloadedmetadata = function() {
-      progress.max = song.duration;
-      progress.value = song.currentTime;
-
-    }
-
-    function playPause(){
-      if(ctrlIcon.classList.contains("fa-pause")){
-        song.pause();
-        ctrlIcon.classList.remove("fa-pause")
-        ctrlIcon.classList.add("fa-play")
-        songImg.classList.remove("rotate")
-      }else{
-        song.play();
-        ctrlIcon.classList.add("fa-pause")
-        ctrlIcon.classList.remove("fa-play")
-        songImg.classList.add("rotate")
-      }
-    }
-
-    if(song.play()){
-      setInterval(() => {
-        progress.value = song.currentTime
-      }, 500);
-    }
-
-    progress.onchange = function() {
-      song.play();
-      song.currentTime = progress.value
-      ctrlIcon.classList.add("fa-pause")
-      ctrlIcon.classList.remove("fa-play")
-    }
-
-  </script>
+  <script src="scripts.js"></script>
 
 </body>
 
