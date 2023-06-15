@@ -11,9 +11,9 @@
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
-	background: linear-gradient(-45deg, #be4ce0, #7023d5, #23d5ab);
+  background: linear-gradient(-45deg, #A97BD5, #813299, #2335d5, #D5A83B);
 	background-size: 400% 400%;
-	animation: gradientAnimation 15s ease infinite;
+	animation: gradientAnimation 12s ease infinite;
 }
 
 @keyframes gradientAnimation {
@@ -33,6 +33,7 @@
 
   padding: 25px 35px;
   text-align: center;
+  z-index: 2;
 }
 nav{
   display: flex;
@@ -141,4 +142,17 @@ nav .circle{
   margin-left: 10px;
   color: #7631f5;
   text-shadow: 3px 2px 4px rgba(0, 0, 0, 0.5);
+}
+#canvas{
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+#arquivoInput,
+#voltar{
+  cursor: pointer;
 }

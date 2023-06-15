@@ -23,20 +23,23 @@
 </head>
 
 <body>
+
   <div class="container">
+
     <div class="music-player">
       <nav>
-        <div class="circle">
+        <div id="voltar" class="circle">
           <i class="fa-solid fa-angle-left" style="color: #63728c;"></i>
         </div>
-        <div class="circle">
-          <i class="fa-solid fa-bars" style="color: #63728c;"></i>
-        </div>
+        <label id="arquivoInput" for="thefile" class="circle" style="color: #63728c;">
+          <i class="fa-solid fa-bars"></i>
+        </label>
       </nav>
       <img src="media/metal2.jpg" class="song-img" id="foto">
-      <h1>Metal Bucetation</h1>
-      <p>Massacration</p>
+      <h1 id="nomeArquivo">Metal Bucetation</h1>
+      <p id="nomeBanda">Massacration</p>
 
+      <input type="file" id="thefile" accept="audio/*" style="display: none;">
       <audio id="song">
         <source src="media/metalbuce.mp3" type="audio/mpeg">
       </audio>
@@ -60,6 +63,8 @@
       </div>
 
     </div>
+    <canvas id="canvas">
+    </canvas>
   </div>
 
   <script src="scripts.js"></script>
