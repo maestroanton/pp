@@ -28,11 +28,28 @@
       }
     }
 
-    if (song.play()) {
-      setInterval(() => {
-        progress.value = song.currentTime
-      }, 500);
+    let isPlaying = false; // Variável de controle do estado de reprodução
+
+    function playAudio() {
+      if (!isPlaying) {
+        song.play();
+        setInterval(() => {
+          progress.value = song.currentTime;
+        }, 500);
+        isPlaying = true;
+      }
     }
+    
+    function pauseAudio() {
+      if (isPlaying) {
+        song.pause();
+        isPlaying = false;
+      }
+    }
+    
+    document.addEventListener("click", playAudio);
+    ctrlIcon.addEventListener("click", pauseAudio);
+    
 
     progress.onchange = function () {
       song.play();
@@ -99,84 +116,114 @@ function getImageFromGoogle(filename) {
 }
 
     //audio visualizer
-    window.onload = function () {
-
+    window.onload = function() {
       var file = document.getElementById("thefile");
       var song = document.getElementById("song");
       var nomeArquivo = document.getElementById("nomeArquivo");
-      var nomeBanda = document.getElementById("nomeBanda")
-
-      file.onchange = function () {
-        ctrlIcon.classList.remove("fa-pause")
-        ctrlIcon.classList.add("fa-play")
-        songImg.classList.remove("rotate")
-        var files = this.files;
-        song.src = URL.createObjectURL(files[0]);
+      var nomeBanda = document.getElementById("nomeBanda");
+      var songImg = document.getElementById("foto");
+      var dropArea = document.getElementById("dropArea");
+    
+      // Função para carregar e reproduzir o arquivo de áudio
+      function loadAudioFile(file) {
+        ctrlIcon.classList.remove("fa-pause");
+        ctrlIcon.classList.add("fa-play");
+        songImg.classList.remove("rotate");
+        song.src = URL.createObjectURL(file);
         song.load();
-        if (file.files.length > 0) {
-          var nomeCompleto = file.files[0].name;
+        if (file) {
+          var nomeCompleto = file.name;
           var nomeSemExtensao = nomeCompleto.substring(0, nomeCompleto.lastIndexOf('.'));
           nomeArquivo.textContent = nomeSemExtensao;
-          nomeBanda.textContent = ""
+          nomeBanda.textContent = "";
           getImageFromGoogle(nomeSemExtensao);
         } else {
           nomeArquivo.textContent = "Metal Bucetation"; // Valor padrão
         }
-
+        // Resto do código relacionado ao áudio, visualização etc.
+      }
+    
+      // Função para iniciar o contexto de áudio após uma ação do usuário
+      function startAudioContext() {
         var context = new AudioContext();
         var src = context.createMediaElementSource(song);
         var analyser = context.createAnalyser();
-
+    
         var canvas = document.getElementById("canvas");
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         var ctx = canvas.getContext("2d");
-
+    
         src.connect(analyser);
         analyser.connect(context.destination);
-
+    
         analyser.fftSize = 256;
-
+    
         var bufferLength = analyser.frequencyBinCount;
         console.log(bufferLength);
-
+    
         var dataArray = new Uint8Array(bufferLength);
-
+    
         var WIDTH = canvas.width;
         var HEIGHT = canvas.height;
-
+    
         var barWidth = (WIDTH / bufferLength) * 2.5;
         var barHeight;
         var x = 0;
-
+    
         function renderFrame() {
           requestAnimationFrame(renderFrame);
-
+    
           x = 0;
-
+    
           analyser.getByteFrequencyData(dataArray);
-
+    
           ctx.clearRect(0, 0, WIDTH, HEIGHT); // Limpa o canvas
-
+    
           for (var i = 0; i < bufferLength; i++) {
             barHeight = dataArray[i];
-          
-            var r = 140 - (180 * (i / bufferLength));
+    
+            var r = 140 - 180 * (i / bufferLength);
             var g = 0;
-            var b = 180 + (75 * (i / bufferLength));
-          
+            var b = 180 + 75 * (i / bufferLength);
+    
             ctx.fillStyle = "rgba(" + r + "," + g + "," + b + ", 1)";
             ctx.fillRect(x, HEIGHT - barHeight, barWidth, barHeight);
-          
+    
             x += barWidth + 3;
           }
-          
+    
           ctx.fillStyle = "rgba(0, 0, 0, 0)"; // Definir a transparência para o retângulo preto
           ctx.fillRect(0, 0, WIDTH, HEIGHT);
         }
         renderFrame();
+      }
+    
+      // Evento de mudança do input de arquivo
+      file.onchange = function() {
+        var files = this.files;
+        loadAudioFile(files[0]);
+        startAudioContext();
       };
+    
+      // Eventos de arrastar e soltar na área designada
+      dropArea.addEventListener("dragover", function(e) {
+        e.preventDefault();
+      });
+    
+      dropArea.addEventListener("dragenter", function(e) {
+        e.preventDefault();
+      });
+    
+      dropArea.addEventListener("drop", function(e) {
+        e.preventDefault();
+        var file = e.dataTransfer.files[0];
+        loadAudioFile(file);
+        startAudioContext();
+      });
     };
+    
+    
     //audio visualizer
 
     var arquivoInput = document.getElementById("arquivoInput");
@@ -189,4 +236,7 @@ function getImageFromGoogle(filename) {
     arquivoInput.addEventListener("mouseout", function() {
       icon.classList.remove("fa-beat");
     });
+
+//arrastar arquivo
+
 
