@@ -130,7 +130,7 @@ nav .circle{
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 10px 0;
+  margin-bottom: 10px;
   
 }
 #currentTime {
@@ -156,4 +156,38 @@ nav .circle{
 #arquivoInput,
 #voltar{
   cursor: pointer;
+}
+
+.volume {
+  width: 100%;
+  height: 6px;
+  display: inline-flex;
+  margin-top: 20px; /* Ajuste a margem inferior conforme necessário */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.volume div{
+  margin: 10px;
+}
+
+#volume{
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  background: #7631f5;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 40px 0;
+}
+
+#volume::-webkit-slider-thumb{
+  -webkit-appearance: none;
+  background: #7631f5;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 4px solid #9582ff;
+  box-shadow: 0 5px 5px rgb(113, 59, 146);
 }

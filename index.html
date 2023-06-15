@@ -3,11 +3,11 @@
 
 <head>
   <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Insert title here</title>
+  <title>PurePlayer</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
   <script type="text/javascript"></script>
+  <link rel="icon" href="favicon.ico" />
 
   <!-- BootsTrap -->
   <!--   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"
@@ -51,7 +51,6 @@
         <span id="duration">0:00</span>
       </div>
 
-
       <div class="controls">
         <div>
           <i class="fa-solid fa-backward" style="color: #63728c;"></i>
@@ -63,10 +62,15 @@
           <i class="fa-solid fa-forward" style="color: #63728c;"></i>
         </div>
       </div>
-
+      <div class="volume">
+        <div><i class="fa-solid fa-volume-low" style="color: #63728c;"></i></div>
+        <div><input type="range" value="100" id="volume"></div>
+        <div><i class="fa-solid fa-volume-high" style="color: #63728c;"></i></div>
+      </div>
     </div>
     <canvas id="canvas">
     </canvas>
+
   </div>
 
   <script src="scripts.js"></script>

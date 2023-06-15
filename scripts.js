@@ -4,6 +4,7 @@
     let currentTime = document.getElementById("currentTime");
     let duration = document.getElementById("duration");
     let songImg = document.getElementById("foto");
+    let volumeSlider = document.getElementById("volume");
 
 
     song.onloadedmetadata = function () {
@@ -39,6 +40,10 @@
       ctrlIcon.classList.add("fa-pause")
       ctrlIcon.classList.remove("fa-play")
     }
+
+    volumeSlider.oninput = function() {
+      song.volume = volumeSlider.value / 100; // Defina o volume com base no valor do controle deslizante (0 a 1)
+    };
 
     song.addEventListener("timeupdate", function () {
       if (song.currentTime === song.duration) {
