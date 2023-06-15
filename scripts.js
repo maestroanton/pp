@@ -5,6 +5,7 @@
     let duration = document.getElementById("duration");
     let songImg = document.getElementById("foto");
 
+
     song.onloadedmetadata = function () {
       progress.max = song.duration;
       progress.value = song.currentTime;
@@ -61,6 +62,36 @@
       return `${minutes}:${seconds.toString().padStart(2, '0')}`;
     }
 
+        // Função para obter a imagem relacionada ao nome do arquivo
+function getImageFromGoogle(filename) {
+  var apiKey = 'AIzaSyBfJZRCvq4SqY-sN9yBi04W077XaehKb2w';
+  var searchQuery = filename + 'foto'; // Adicione "capa do álbum" para melhorar a precisão da pesquisa
+  var url = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=c6a46b6ea28a3411a&q=${encodeURIComponent(searchQuery)}&searchType=image`;
+
+  axios.get(url)
+    .then(function(response) {
+      var items = response.data.items;
+      if (items && items.length > 0) { // Verifica se items está definido e não vazio
+        var imageUrl = items[0].link;
+        console.log('URL da imagem:', imageUrl);
+        var songImg = document.getElementById('foto'); // Obtém a referência da tag de imagem
+        songImg.onload = function() {
+          // Atribui a URL da imagem após o carregamento bem-sucedido
+          songImg.setAttribute('src', imageUrl);
+        };
+        songImg.onerror = function() {
+          console.log('Erro ao carregar a imagem:', imageUrl);
+        };
+        songImg.src = imageUrl; // Define o atributo src da tag de imagem
+      } else {
+        console.log('Nenhuma imagem encontrada para o nome do arquivo:', filename);
+      }
+    })
+    .catch(function(error) {
+      console.log('Erro ao obter a imagem:', error);
+    });
+}
+
     //audio visualizer
     window.onload = function () {
 
@@ -78,6 +109,7 @@
           var nomeSemExtensao = nomeCompleto.replace(".mp3", "");
           nomeArquivo.textContent = nomeSemExtensao;
           nomeBanda.textContent = ""
+          getImageFromGoogle(nomeSemExtensao);
         } else {
           nomeArquivo.textContent = "Metal Bucetation"; // Valor padrão
         }
@@ -148,3 +180,4 @@
     arquivoInput.addEventListener("mouseout", function() {
       icon.classList.remove("fa-beat");
     });
+
