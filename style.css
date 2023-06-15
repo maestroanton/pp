@@ -93,8 +93,8 @@ nav .circle{
 #progress::-webkit-slider-thumb{
   -webkit-appearance: none;
   background: #7631f5;
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   border: 8px solid #9582ff;
   box-shadow: 0 5px 5px rgb(113, 59, 146);
