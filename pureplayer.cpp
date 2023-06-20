@@ -1,12 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-
-#ifdef __linux__
-#include <SDL2/SDL.h>
-#elif _WIN32
-#include "SDL.h"
-#endif
-#include "handle.h"
+#include <SDL.h>
+#include "handle.hpp"
 
 /* I know global variables suck but it is what it is. */
 
@@ -17,14 +10,14 @@ static Uint32 audioLen = 0;
 static SDL_AudioSpec audioSpec;
 static SDL_AudioStream *data_stream;
 
-SDL_bool rewind_wav(SDL_AudioDeviceID *spk, SDL_AudioStream *stream, Uint8 *buf, Uint32 len, SDL_Window *win); /* Restart */
+SDL_bool rewind_wav(SDL_AudioDeviceID spk, SDL_AudioStream *stream, Uint8 *buf, Uint32 len, SDL_Window *win); /* Restart */
 SDL_bool load_wav(const char *fname, SDL_Window *win); /* Loads WAV and creates audio stream. */
 
 int
-main(int argc, char **argv)
+main(int argc, char **argv )
 {
-    if(SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO) == -1) {
-        panic_abort("Panic!", "Not able to init SNL.", NULL);
+    if(SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO == -1)) {
+        panic_abort("Error!", SDL_GetError(), NULL);
     }
 
     SDL_AudioDeviceID speaker;
@@ -234,7 +227,7 @@ failed:
 }
 
 SDL_bool
-rewind_wav(SDL_AudioDeviceID *spk, SDL_AudioStream *stream, Uint8 *buf, Uint32 len, SDL_Window *win)
+rewind_wav(SDL_AudioDeviceID spk, SDL_AudioStream *stream, Uint8 *buf, Uint32 len, SDL_Window *win)
 {
     SDL_ClearQueuedAudio(spk);
     SDL_AudioStreamClear(stream);

@@ -1,11 +1,11 @@
-#include <SDL2/SDL.h>
-#include <stdio.h>
+#include <SDL.h>
 #include <stdlib.h>
+#include <iostream>
 
 void
 panic_abort(const char *title, const char *text, SDL_Window *win)
 {
-    fprintf(stderr, "%s ... %s\n", title, text);
+    std::cerr << title << text;
     SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title, text, win);
 
     SDL_Quit();
